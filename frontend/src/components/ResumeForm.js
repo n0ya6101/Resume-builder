@@ -33,6 +33,60 @@ const ResumeForm = () => {
   
   const [formErrors, setFormErrors] = useState({});
 
+  // Format and validate MM/YYYY date input
+  const formatDateInput = (value) => {
+    // Remove non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Format as MM/YYYY
+    if (digits.length <= 2) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return digits.slice(0, 2) + '/' + digits.slice(2);
+    }
+    return digits.slice(0, 2) + '/' + digits.slice(2, 6);
+  };
+
+  const validateDate = (value) => {
+    if (!value) return true; // Empty is valid
+    
+    const datePattern = /^(0[1-9]|1[0-2])\/\d{4}$/;
+    if (!datePattern.test(value)) {
+      return false;
+    }
+    
+    const [month, year] = value.split('/').map(Number);
+    const currentYear = new Date().getFullYear();
+    
+    // Validate month and reasonable year range
+    if (month < 1 || month > 12 || year < 1950 || year > currentYear + 10) {
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleDateChange = (setter, field, value) => {
+    const formatted = formatDateInput(value);
+    setter(prev => ({ ...prev, [field]: formatted }));
+    
+    // Validate on complete input
+    if (formatted.length === 7) {
+      if (!validateDate(formatted)) {
+        setFormErrors(prev => ({ 
+          ...prev, 
+          [field]: 'Invalid date format. Use MM/YYYY (e.g., 01/2020)' 
+        }));
+      } else {
+        setFormErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    }
+  };
+
   const validateField = (name, value) => {
     let error = '';
     if (name === 'email' && value && !/\S+@\S+\.\S+/.test(value)) {
@@ -54,6 +108,16 @@ const ResumeForm = () => {
   };
 
   const handleAddExperience = () => {
+    // Validate dates before adding
+    if (newExperience.startDate && !validateDate(newExperience.startDate)) {
+      alert('Please enter a valid start date in MM/YYYY format');
+      return;
+    }
+    if (!newExperience.current && newExperience.endDate && !validateDate(newExperience.endDate)) {
+      alert('Please enter a valid end date in MM/YYYY format');
+      return;
+    }
+    
     if (newExperience.company && newExperience.position) {
       addExperience(newExperience);
       setNewExperience({
@@ -68,6 +132,16 @@ const ResumeForm = () => {
   };
 
   const handleAddEducation = () => {
+    // Validate dates before adding
+    if (newEducation.startDate && !validateDate(newEducation.startDate)) {
+      alert('Please enter a valid start date in MM/YYYY format');
+      return;
+    }
+    if (newEducation.endDate && !validateDate(newEducation.endDate)) {
+      alert('Please enter a valid end date in MM/YYYY format');
+      return;
+    }
+    
     if (newEducation.institution && newEducation.degree) {
       addEducation(newEducation);
       setNewEducation({
@@ -82,7 +156,7 @@ const ResumeForm = () => {
   };
 
   const handleSkillsChange = (e) => {
-    const skills = e.target.value.split(',').map(skill => skill.trim());
+    const skills = e.target.value.split(',').map(skill => skill.trim()).filter(skill => skill);
     updateSkills(skills);
   };
 
@@ -135,7 +209,6 @@ const ResumeForm = () => {
             onChange={(e) => handlePersonalInfoChange('address', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2"
           />
-          {/* ----- ADDED FIELDS START ----- */}
           <input
             type="text"
             placeholder="LinkedIn URL"
@@ -150,7 +223,6 @@ const ResumeForm = () => {
             onChange={(e) => handlePersonalInfoChange('github', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {/* ----- ADDED FIELDS END ----- */}
         </div>
       </div>
 
@@ -189,20 +261,39 @@ const ResumeForm = () => {
             onChange={(e) => setNewExperience({...newExperience, position: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <input
-            type="text"
-            placeholder="Start Date (MM/YYYY)"
-            value={newExperience.startDate}
-            onChange={(e) => setNewExperience({...newExperience, startDate: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="text"
-            placeholder="End Date (MM/YYYY) or Present"
-            value={newExperience.endDate}
-            onChange={(e) => setNewExperience({...newExperience, endDate: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div>
+            <input
+              type="text"
+              placeholder="Start Date (MM/YYYY)"
+              value={newExperience.startDate}
+              onChange={(e) => handleDateChange(setNewExperience, 'startDate', e.target.value)}
+              maxLength="7"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formErrors.startDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+            />
+            {formErrors.startDate && <p className="text-red-500 text-xs mt-1">{formErrors.startDate}</p>}
+            <p className="text-xs text-gray-500 mt-1">Format: MM/YYYY (e.g., 01/2020)</p>
+          </div>
+          <div>
+            <input
+              type="text"
+              placeholder="End Date (MM/YYYY)"
+              value={newExperience.endDate}
+              onChange={(e) => handleDateChange(setNewExperience, 'endDate', e.target.value)}
+              maxLength="7"
+              disabled={newExperience.current}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${newExperience.current ? 'bg-gray-100' : ''} ${formErrors.endDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+            />
+            {formErrors.endDate && <p className="text-red-500 text-xs mt-1">{formErrors.endDate}</p>}
+            <label className="flex items-center mt-2">
+              <input
+                type="checkbox"
+                checked={newExperience.current}
+                onChange={(e) => setNewExperience({...newExperience, current: e.target.checked, endDate: ''})}
+                className="mr-2"
+              />
+              <span className="text-sm text-gray-700">Currently working here</span>
+            </label>
+          </div>
           <textarea
             placeholder="Description"
             value={newExperience.description}
@@ -223,7 +314,7 @@ const ResumeForm = () => {
             <div>
               <strong>{exp.position}</strong> at {exp.company}
               <div className="text-sm text-gray-600">
-                {exp.startDate} - {exp.endDate || 'Present'}
+                {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
               </div>
             </div>
             <button
@@ -264,20 +355,30 @@ const ResumeForm = () => {
             onChange={(e) => setNewEducation({...newEducation, field: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <input
-            type="text"
-            placeholder="Start Date (MM/YYYY)"
-            value={newEducation.startDate}
-            onChange={(e) => setNewEducation({...newEducation, startDate: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="text"
-            placeholder="End Date (MM/YYYY)"
-            value={newEducation.endDate}
-            onChange={(e) => setNewEducation({...newEducation, endDate: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div>
+            <input
+              type="text"
+              placeholder="Start Date (MM/YYYY)"
+              value={newEducation.startDate}
+              onChange={(e) => handleDateChange(setNewEducation, 'startDate', e.target.value)}
+              maxLength="7"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formErrors.eduStartDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+            />
+            {formErrors.eduStartDate && <p className="text-red-500 text-xs mt-1">{formErrors.eduStartDate}</p>}
+            <p className="text-xs text-gray-500 mt-1">Format: MM/YYYY</p>
+          </div>
+          <div>
+            <input
+              type="text"
+              placeholder="End Date (MM/YYYY)"
+              value={newEducation.endDate}
+              onChange={(e) => handleDateChange(setNewEducation, 'endDate', e.target.value)}
+              maxLength="7"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formErrors.eduEndDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+            />
+            {formErrors.eduEndDate && <p className="text-red-500 text-xs mt-1">{formErrors.eduEndDate}</p>}
+            <p className="text-xs text-gray-500 mt-1">Format: MM/YYYY</p>
+          </div>
           <input
             type="text"
             placeholder="GPA"

@@ -1,5 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { resumeAPI } from '../services/api';
+import React, { createContext, useState, useContext } from 'react';
 
 const ResumeContext = createContext();
 
@@ -27,7 +26,10 @@ export const ResumeProvider = ({ children }) => {
   const [resumeName, setResumeName] = useState('My Resume');
 
   const updatePersonalInfo = (info) => {
-    setResumeData(prev => ({ ...prev, personalInfo: { ...prev.personalInfo, ...info } }));
+    setResumeData(prev => ({ 
+      ...prev, 
+      personalInfo: { ...prev.personalInfo, ...info } 
+    }));
   };
 
   const updateSummary = (summary) => {
@@ -83,28 +85,60 @@ export const ResumeProvider = ({ children }) => {
   const updateSkills = (skills) => {
     setResumeData(prev => ({ ...prev, skills }));
   };
-const loadResume = (resume) => {
+
+  const safeJSONParse = (jsonString, defaultValue) => {
     try {
-      setResumeData({
-        personalInfo: resume.personalInfo ? JSON.parse(resume.personalInfo) : {
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          address: '',
-          linkedin: '',
-          github: ''
-        },
-        summary: resume.summary || '',
-        experiences: resume.experiences ? JSON.parse(resume.experiences) : [],
-        education: resume.education ? JSON.parse(resume.education) : [],
-        skills: resume.skills ? JSON.parse(resume.skills) : []
+      if (!jsonString || jsonString.trim() === '') {
+        return defaultValue;
+      }
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Error parsing JSON:', error, 'Value:', jsonString);
+      return defaultValue;
+    }
+  };
+
+  const loadResume = (resume) => {
+    try {
+      console.log('Loading resume:', resume);
+      
+      // Parse personal info with fallback
+      const personalInfo = safeJSONParse(resume.personalInfo, {
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        address: '',
+        linkedin: '',
+        github: ''
       });
+
+      // Parse experiences with fallback
+      const experiences = safeJSONParse(resume.experiences, []);
+
+      // Parse education with fallback
+      const education = safeJSONParse(resume.education, []);
+
+      // Parse skills with fallback
+      const skills = safeJSONParse(resume.skills, []);
+
+      setResumeData({
+        personalInfo,
+        summary: resume.summary || '',
+        experiences,
+        education,
+        skills
+      });
+      
       setSelectedTemplate(resume.templateId || 'template1');
       setCurrentResumeId(resume.id);
       setResumeName(resume.name || 'My Resume');
+      
+      console.log('Resume loaded successfully');
     } catch (error) {
       console.error('Error loading resume:', error);
+      // Don't throw - just log and use defaults
+      alert('There was an error loading the resume. Some data may be missing.');
     }
   };
 

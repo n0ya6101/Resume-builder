@@ -1,67 +1,36 @@
-package com.resume.model;
+package com.resume.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import com.resume.model.Resume;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "resumes")
-public class Resume {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ResumeResponse {
     private Long id;
-    
-    @Column(nullable = false)
     private String name;
-    
-    @Column(name = "template_id", nullable = false)
     private String templateId;
-    
-    @Column(columnDefinition = "TEXT")
     private String personalInfo;
-    
-    @Column(columnDefinition = "TEXT")
     private String summary;
-    
-    @Column(columnDefinition = "TEXT")
     private String experiences;
-    
-    @Column(columnDefinition = "TEXT")
     private String education;
-    
-    @Column(columnDefinition = "TEXT")
     private String skills;
-    
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
-    
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore  // CRITICAL: Prevents infinite recursion during JSON serialization
-    private User user;
-    
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    // Constructor from Resume entity
+    public ResumeResponse(Resume resume) {
+        this.id = resume.getId();
+        this.name = resume.getName();
+        this.templateId = resume.getTemplateId();
+        this.personalInfo = resume.getPersonalInfo();
+        this.summary = resume.getSummary();
+        this.experiences = resume.getExperiences();
+        this.education = resume.getEducation();
+        this.skills = resume.getSkills();
+        this.createdAt = resume.getCreatedAt();
+        this.updatedAt = resume.getUpdatedAt();
     }
     
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-    
-    // Constructors
-    public Resume() {}
-    
-    public Resume(String name, String templateId, User user) {
-        this.name = name;
-        this.templateId = templateId;
-        this.user = user;
-    }
+    // Default constructor
+    public ResumeResponse() {}
     
     // Getters and Setters
     public Long getId() { return id; }
@@ -93,7 +62,4 @@ public class Resume {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-    
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
 }
