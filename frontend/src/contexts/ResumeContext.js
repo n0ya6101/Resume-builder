@@ -83,8 +83,7 @@ export const ResumeProvider = ({ children }) => {
   const updateSkills = (skills) => {
     setResumeData(prev => ({ ...prev, skills }));
   };
-
-  const loadResume = (resume) => {
+const loadResume = (resume) => {
     try {
       setResumeData({
         personalInfo: resume.personalInfo ? JSON.parse(resume.personalInfo) : {

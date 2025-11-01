@@ -30,8 +30,22 @@ const ResumeForm = () => {
     endDate: '',
     gpa: ''
   });
+  
+  const [formErrors, setFormErrors] = useState({});
+
+  const validateField = (name, value) => {
+    let error = '';
+    if (name === 'email' && value && !/\S+@\S+\.\S+/.test(value)) {
+      error = 'Invalid email address.';
+    }
+    if (name === 'phone' && value && !/^[0-9-()+ ]+$/.test(value)) {
+      error = 'Invalid phone number.';
+    }
+    setFormErrors(prev => ({ ...prev, [name]: error }));
+  };
 
   const handlePersonalInfoChange = (field, value) => {
+    validateField(field, value);
     updatePersonalInfo({ [field]: value });
   };
 
@@ -68,7 +82,7 @@ const ResumeForm = () => {
   };
 
   const handleSkillsChange = (e) => {
-    const skills = e.target.value.split(',').map(skill => skill.trim()).filter(skill => skill);
+    const skills = e.target.value.split(',').map(skill => skill.trim());
     updateSkills(skills);
   };
 
@@ -94,20 +108,26 @@ const ResumeForm = () => {
             onChange={(e) => handlePersonalInfoChange('lastName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <input
-            type="email"
-            placeholder="Email"
-            value={resumeData.personalInfo.email}
-            onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="tel"
-            placeholder="Phone"
-            value={resumeData.personalInfo.phone}
-            onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div>
+            <input
+              type="email"
+              placeholder="Email"
+              value={resumeData.personalInfo.email}
+              onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formErrors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+            />
+            {formErrors.email && <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>}
+          </div>
+          <div>
+            <input
+              type="tel"
+              placeholder="Phone"
+              value={resumeData.personalInfo.phone}
+              onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formErrors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+            />
+            {formErrors.phone && <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>}
+          </div>
           <input
             type="text"
             placeholder="Address"
@@ -115,6 +135,22 @@ const ResumeForm = () => {
             onChange={(e) => handlePersonalInfoChange('address', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2"
           />
+          {/* ----- ADDED FIELDS START ----- */}
+          <input
+            type="text"
+            placeholder="LinkedIn URL"
+            value={resumeData.personalInfo.linkedin}
+            onChange={(e) => handlePersonalInfoChange('linkedin', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="text"
+            placeholder="GitHub URL"
+            value={resumeData.personalInfo.github}
+            onChange={(e) => handlePersonalInfoChange('github', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {/* ----- ADDED FIELDS END ----- */}
         </div>
       </div>
 

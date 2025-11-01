@@ -37,6 +37,12 @@ const Register = () => {
     setError('Password must be at least 6 characters long');
     return;
   }
+  
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+  if (!passwordRegex.test(formData.password)) {
+    setError('Password must contain at least one letter and one number.');
+    return;
+  }
 
   console.log('📝 Form data validated:', formData);
   
