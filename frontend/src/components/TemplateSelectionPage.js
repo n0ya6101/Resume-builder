@@ -24,6 +24,24 @@ const TemplateSelectionPage = () => {
       name: 'Minimalist',
       description: 'Simple and elegant design with plenty of white space',
       color: 'bg-purple-500'
+    },
+    {
+        id: 'template4',
+        name: 'Creative',
+        description: 'A creative layout with a sidebar for personal information.',
+        color: 'bg-pink-500'
+    },
+    {
+        id: 'template5',
+        name: 'Corporate',
+        description: 'A formal and structured template for corporate applications.',
+        color: 'bg-indigo-500'
+    },
+    {
+        id: 'template6',
+        name: 'Technical',
+        description: 'A template designed to highlight skills and technical expertise.',
+        color: 'bg-gray-700'
     }
   ];
 
