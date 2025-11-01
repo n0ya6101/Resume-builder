@@ -11,10 +11,13 @@ const ResumePreview = () => {
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
           {resumeData.personalInfo.firstName} {resumeData.personalInfo.lastName}
         </h1>
-        <div className="flex justify-center space-x-4 text-gray-600 text-sm">
+        <div className="flex justify-center flex-wrap space-x-4 text-gray-600 text-sm">
           {resumeData.personalInfo.email && <span>{resumeData.personalInfo.email}</span>}
           {resumeData.personalInfo.phone && <span>• {resumeData.personalInfo.phone}</span>}
           {resumeData.personalInfo.address && <span>• {resumeData.personalInfo.address}</span>}
+          {/* ----- ADDED FIELDS ----- */}
+          {resumeData.personalInfo.linkedin && <span>• {resumeData.personalInfo.linkedin}</span>}
+          {resumeData.personalInfo.github && <span>• {resumeData.personalInfo.github}</span>}
         </div>
       </header>
 
@@ -103,12 +106,71 @@ const ResumePreview = () => {
           {resumeData.personalInfo.email && <span>📧 {resumeData.personalInfo.email}</span>}
           {resumeData.personalInfo.phone && <span>📱 {resumeData.personalInfo.phone}</span>}
           {resumeData.personalInfo.address && <span>📍 {resumeData.personalInfo.address}</span>}
+          {/* ----- ADDED FIELDS ----- */}
+          {resumeData.personalInfo.linkedin && <span>• {resumeData.personalInfo.linkedin}</span>}
+          {resumeData.personalInfo.github && <span>• {resumeData.personalInfo.github}</span>}
         </div>
       </header>
       {resumeData.summary && (
         <section className="mb-6">
           <h2 className="text-xl font-semibold text-green-600 mb-3">SUMMARY</h2>
           <p className="text-gray-700 leading-relaxed">{resumeData.summary}</p>
+        </section>
+      )}
+      {/* ----- ADDED SECTIONS ----- */}
+      {/* Experience */}
+      {resumeData.experiences.length > 0 && (
+        <section className="mb-6">
+          <h2 className="text-xl font-semibold text-green-600 mb-3">WORK EXPERIENCE</h2>
+          {resumeData.experiences.map((exp, index) => (
+            <div key={index} className="mb-4">
+              <div className="flex justify-between items-start">
+                <h3 className="font-semibold text-gray-800">{exp.position}</h3>
+                <span className="text-gray-600 text-sm">
+                  {exp.startDate} - {exp.endDate || 'Present'}
+                </span>
+              </div>
+              <p className="text-gray-700 font-medium mb-1">{exp.company}</p>
+              {exp.description && <p className="text-gray-600 text-sm">{exp.description}</p>}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Education */}
+      {resumeData.education.length > 0 && (
+        <section className="mb-6">
+          <h2 className="text-xl font-semibold text-green-600 mb-3">EDUCATION</h2>
+          {resumeData.education.map((edu, index) => (
+            <div key={index} className="mb-4">
+              <div className="flex justify-between items-start">
+                <h3 className="font-semibold text-gray-800">{edu.degree}</h3>
+                <span className="text-gray-600 text-sm">
+                  {edu.startDate} - {edu.endDate}
+                </span>
+              </div>
+              <p className="text-gray-700 font-medium mb-1">{edu.institution}</p>
+              {edu.field && <p className="text-gray-600 text-sm">{edu.field}</p>}
+              {edu.gpa && <p className="text-gray-600 text-sm">GPA: {edu.gpa}</p>}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Skills */}
+      {resumeData.skills.length > 0 && (
+        <section>
+          <h2 className="text-xl font-semibold text-green-600 mb-3">SKILLS</h2>
+          <div className="flex flex-wrap gap-2">
+            {resumeData.skills.map((skill, index) => (
+              <span
+                key={index}
+                className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
         </section>
       )}
     </div>
@@ -120,10 +182,13 @@ const ResumePreview = () => {
                 <h1 className="text-2xl font-bold text-gray-800 mb-4">
                     {resumeData.personalInfo.firstName} {resumeData.personalInfo.lastName}
                 </h1>
-                <div className="text-gray-600 text-sm">
+                <div className="text-gray-600 text-sm space-y-1">
                     <p>{resumeData.personalInfo.email}</p>
                     <p>{resumeData.personalInfo.phone}</p>
                     <p>{resumeData.personalInfo.address}</p>
+                    {/* ----- ADDED FIELDS ----- */}
+                    <p>{resumeData.personalInfo.linkedin}</p>
+                    <p>{resumeData.personalInfo.github}</p>
                 </div>
                  {resumeData.skills.length > 0 && (
                     <section className="mt-6">
@@ -159,6 +224,21 @@ const ResumePreview = () => {
                         ))}
                     </section>
                 )}
+                {/* ----- ADDED EDUCATION ----- */}
+                {resumeData.education.length > 0 && (
+                    <section className="mb-6">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-2 border-b-2 border-pink-500 pb-1">
+                            Education
+                        </h2>
+                        {resumeData.education.map((edu, index) => (
+                            <div key={index} className="mb-4">
+                                <h3 className="font-semibold">{edu.degree} - {edu.field}</h3>
+                                <p className="text-gray-700">{edu.institution}</p>
+                                <p className="text-sm text-gray-600">{edu.startDate} - {edu.endDate}</p>
+                            </div>
+                        ))}
+                    </section>
+                )}
             </div>
         </div>
     );
@@ -168,7 +248,16 @@ const ResumePreview = () => {
                 <h1 className="text-4xl font-extrabold text-gray-800">
                     {resumeData.personalInfo.firstName} {resumeData.personalInfo.lastName}
                 </h1>
-                <p className="text-gray-600">{resumeData.personalInfo.email} | {resumeData.personalInfo.phone}</p>
+                <p className="text-gray-600">
+                    {resumeData.personalInfo.email}
+                    {resumeData.personalInfo.phone && ` | ${resumeData.personalInfo.phone}`}
+                    {resumeData.personalInfo.address && ` | ${resumeData.personalInfo.address}`}
+                </p>
+                {/* ----- ADDED FIELDS ----- */}
+                <p className="text-gray-600">
+                    {resumeData.personalInfo.linkedin && ` ${resumeData.personalInfo.linkedin}`}
+                    {resumeData.personalInfo.github && ` | ${resumeData.personalInfo.github}`}
+                </p>
             </header>
             {resumeData.summary && (
                 <section className="mb-6">
@@ -199,6 +288,22 @@ const ResumePreview = () => {
                     ))}
                 </section>
             )}
+            {/* ----- ADDED SKILLS ----- */}
+            {resumeData.skills.length > 0 && (
+                <section className="mt-6">
+                    <h2 className="text-xl font-semibold text-indigo-600 mb-2">Skills</h2>
+                    <div className="flex flex-wrap gap-2">
+                        {resumeData.skills.map((skill, index) => (
+                        <span
+                            key={index}
+                            className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm"
+                        >
+                            {skill}
+                        </span>
+                        ))}
+                    </div>
+                </section>
+            )}
         </div>
     );
     const renderTemplate6 = () => (
@@ -208,7 +313,19 @@ const ResumePreview = () => {
                     {resumeData.personalInfo.firstName} {resumeData.personalInfo.lastName}
                 </h1>
                 <p className="text-gray-600">{resumeData.personalInfo.email}</p>
+                {/* ----- ADDED FIELDS ----- */}
+                <p className="text-gray-600">{resumeData.personalInfo.phone}</p>
+                <p className="text-gray-600">{resumeData.personalInfo.address}</p>
+                <p className="text-gray-600">{resumeData.personalInfo.linkedin}</p>
+                <p className="text-gray-600">{resumeData.personalInfo.github}</p>
             </header>
+            {/* ----- ADDED SUMMARY ----- */}
+            {resumeData.summary && (
+                <section className="mb-6">
+                    <h2 className="text-lg font-semibold text-gray-700 mb-2">Summary</h2>
+                    <p className="text-gray-700">{resumeData.summary}</p>
+                </section>
+            )}
             {resumeData.skills.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-lg font-semibold text-gray-700 mb-2">Skills</h2>
@@ -222,13 +339,27 @@ const ResumePreview = () => {
                 </section>
             )}
             {resumeData.experiences.length > 0 && (
-                <section>
+                <section className="mb-6">
                     <h2 className="text-lg font-semibold text-gray-700 mb-2">Experience</h2>
                     {resumeData.experiences.map((exp, index) => (
                         <div key={index} className="mb-4">
                             <h3 className="font-semibold">{exp.position}</h3>
                             <p className="text-sm">{exp.company}</p>
                             <p className="text-xs text-gray-500">{exp.startDate} - {exp.endDate || 'Present'}</p>
+                            <p className="text-gray-700 text-sm">{exp.description}</p>
+                        </div>
+                    ))}
+                </section>
+            )}
+            {/* ----- ADDED EDUCATION ----- */}
+            {resumeData.education.length > 0 && (
+                <section>
+                    <h2 className="text-lg font-semibold text-gray-700 mb-2">Education</h2>
+                    {resumeData.education.map((edu, index) => (
+                        <div key={index} className="mb-4">
+                            <h3 className="font-semibold">{edu.degree} - {edu.field}</h3>
+                            <p className="text-sm">{edu.institution}</p>
+                            <p className="text-xs text-gray-500">{edu.startDate} - {edu.endDate}</p>
                         </div>
                     ))}
                 </section>

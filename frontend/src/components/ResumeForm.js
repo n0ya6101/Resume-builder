@@ -135,6 +135,22 @@ const ResumeForm = () => {
             onChange={(e) => handlePersonalInfoChange('address', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2"
           />
+          {/* ----- ADDED FIELDS START ----- */}
+          <input
+            type="text"
+            placeholder="LinkedIn URL"
+            value={resumeData.personalInfo.linkedin}
+            onChange={(e) => handlePersonalInfoChange('linkedin', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="text"
+            placeholder="GitHub URL"
+            value={resumeData.personalInfo.github}
+            onChange={(e) => handlePersonalInfoChange('github', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {/* ----- ADDED FIELDS END ----- */}
         </div>
       </div>
 
