@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 second timeout
 });
 
 api.interceptors.request.use(
@@ -42,8 +43,21 @@ api.interceptors.response.use(
     console.error('❌ API Response Error:', {
       status: error.response?.status,
       data: error.response?.data,
-      message: error.message
+      message: error.message,
+      code: error.code
     });
+    
+    // Handle specific error cases
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout - server took too long to respond');
+    } else if (error.code === 'ERR_NETWORK') {
+      console.error('Network error - check if backend is running on port 8080');
+    } else if (error.response?.status === 401) {
+      console.error('Unauthorized - token may be expired');
+      // Optionally redirect to login
+      // window.location.href = '/login';
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -62,15 +76,28 @@ export const resumeAPI = {
       ...resumeData,
       templateId
     }, {
-      responseType: 'blob'
+      responseType: 'blob',
+      timeout: 60000 // 60 seconds for PDF generation
     }),
 
-  saveResume: (resumeData, templateId, name) =>
-    api.post('/user/resumes', {
-      ...resumeData,
-      templateId,
-      name
-    }),
+  saveResume: async (resumeData, templateId, name) => {
+    try {
+      const response = await api.post('/user/resumes', {
+        ...resumeData,
+        templateId,
+        name
+      });
+      
+      // Extract the resume from the response wrapper
+      return {
+        ...response,
+        data: response.data.resume || response.data
+      };
+    } catch (error) {
+      console.error('Save resume error:', error);
+      throw error;
+    }
+  },
 
   getUserResumes: () =>
     api.get('/user/resumes'),
@@ -78,8 +105,20 @@ export const resumeAPI = {
   getResume: (id) =>
     api.get(`/user/resumes/${id}`),
 
-  updateResume: (id, resumeData) =>
-    api.put(`/user/resumes/${id}`, resumeData),
+  updateResume: async (id, resumeData) => {
+    try {
+      const response = await api.put(`/user/resumes/${id}`, resumeData);
+      
+      // Extract the resume from the response wrapper
+      return {
+        ...response,
+        data: response.data.resume || response.data
+      };
+    } catch (error) {
+      console.error('Update resume error:', error);
+      throw error;
+    }
+  },
 
   deleteResume: (id) =>
     api.delete(`/user/resumes/${id}`)

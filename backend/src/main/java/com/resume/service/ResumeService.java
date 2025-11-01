@@ -8,6 +8,7 @@ import com.resume.model.User;
 import com.resume.repository.ResumeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,71 +30,102 @@ public class ResumeService {
         return resumeRepository.findByIdAndUser(id, user);
     }
     
+    @Transactional
     public Resume saveResume(ResumeRequest request, User user) {
         try {
+            // Validate required fields
+            if (request.getName() == null || request.getName().trim().isEmpty()) {
+                throw new RuntimeException("Resume name is required");
+            }
+            
+            if (request.getTemplateId() == null || request.getTemplateId().trim().isEmpty()) {
+                throw new RuntimeException("Template ID is required");
+            }
+            
             Resume resume = new Resume();
             resume.setName(request.getName());
             resume.setTemplateId(request.getTemplateId());
             resume.setUser(user);
             
             // Convert objects to JSON strings for storage
-            if (request.getPersonalInfo() != null) {
+            // Handle null values properly
+            if (request.getPersonalInfo() != null && !request.getPersonalInfo().isEmpty()) {
                 resume.setPersonalInfo(objectMapper.writeValueAsString(request.getPersonalInfo()));
+            } else {
+                resume.setPersonalInfo("{}");
             }
-            resume.setSummary(request.getSummary());
-            if (request.getExperiences() != null) {
+            
+            resume.setSummary(request.getSummary() != null ? request.getSummary() : "");
+            
+            if (request.getExperiences() != null && !request.getExperiences().isEmpty()) {
                 resume.setExperiences(objectMapper.writeValueAsString(request.getExperiences()));
+            } else {
+                resume.setExperiences("[]");
             }
-            if (request.getEducation() != null) {
+            
+            if (request.getEducation() != null && !request.getEducation().isEmpty()) {
                 resume.setEducation(objectMapper.writeValueAsString(request.getEducation()));
+            } else {
+                resume.setEducation("[]");
             }
-            if (request.getSkills() != null) {
+            
+            if (request.getSkills() != null && !request.getSkills().isEmpty()) {
                 resume.setSkills(objectMapper.writeValueAsString(request.getSkills()));
+            } else {
+                resume.setSkills("[]");
             }
             
             return resumeRepository.save(resume);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error processing resume data", e);
+            throw new RuntimeException("Error processing resume data: " + e.getMessage(), e);
         }
     }
     
+    @Transactional
     public Resume updateResume(Long id, ResumeRequest request, User user) {
         Resume resume = resumeRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new RuntimeException("Resume not found"));
+                .orElseThrow(() -> new RuntimeException("Resume not found or you don't have permission to edit it"));
         
         try {
-            if (request.getName() != null) {
+            // Update only if provided
+            if (request.getName() != null && !request.getName().trim().isEmpty()) {
                 resume.setName(request.getName());
             }
-            if (request.getTemplateId() != null) {
+            
+            if (request.getTemplateId() != null && !request.getTemplateId().trim().isEmpty()) {
                 resume.setTemplateId(request.getTemplateId());
             }
             
             if (request.getPersonalInfo() != null) {
                 resume.setPersonalInfo(objectMapper.writeValueAsString(request.getPersonalInfo()));
             }
+            
             if (request.getSummary() != null) {
                 resume.setSummary(request.getSummary());
             }
+            
             if (request.getExperiences() != null) {
                 resume.setExperiences(objectMapper.writeValueAsString(request.getExperiences()));
             }
+            
             if (request.getEducation() != null) {
                 resume.setEducation(objectMapper.writeValueAsString(request.getEducation()));
             }
+            
             if (request.getSkills() != null) {
                 resume.setSkills(objectMapper.writeValueAsString(request.getSkills()));
             }
             
             return resumeRepository.save(resume);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error processing resume data", e);
+            throw new RuntimeException("Error processing resume data: " + e.getMessage(), e);
         }
     }
     
+    @Transactional
     public void deleteResume(Long id, User user) {
         Resume resume = resumeRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new RuntimeException("Resume not found"));
+                .orElseThrow(() -> new RuntimeException("Resume not found or you don't have permission to delete it"));
         resumeRepository.delete(resume);
     }
 }
